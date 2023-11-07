@@ -203,4 +203,6 @@ app.post("/webhook", async (req, res) => {
   }
 });
 
-export default app;
+app.listen(process.env, () => {
+  console.log('Server is runnning')
+})
