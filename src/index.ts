@@ -203,6 +203,6 @@ app.post("/webhook", async (req, res) => {
   }
 });
 
-app.listen(process.env, () => {
+app.listen(process.env.PORT, () => {
   console.log('Server is runnning')
 })
