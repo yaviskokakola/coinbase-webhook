@@ -106,10 +106,11 @@ app.post("/webhook", async (c) => {
     let expiresAt = new Date(date);
     expiresAt.setMonth(expiresAt.getMonth() + 1);
 
-    console.log(body);
+    console.log(body)
 
-    if (body.event.type === "charge:confirmed") {
+    if (body?.event?.type === "charge:confirmed") {
       const { paymentId } = body.event?.data?.metadata;
+      console.log("here?");
 
       await prisma.payment.update({
         where: { id: paymentId },
@@ -123,7 +124,7 @@ app.post("/webhook", async (c) => {
       });
     }
 
-    if (body.event.type === "charge:created") {
+    if (body?.event?.type === "charge:created") {
       const { paymentId } = body.event?.data?.metadata;
 
       await prisma.payment.update({
@@ -139,7 +140,7 @@ app.post("/webhook", async (c) => {
       });
     }
 
-    if (body.event.type === "charge:delayed") {
+    if (body?.event?.type === "charge:delayed") {
       const { paymentId } = body.event?.data?.metadata;
       const paymentTransactionId = body.event.data.payments[0]?.transaction_id;
 
@@ -157,7 +158,7 @@ app.post("/webhook", async (c) => {
       });
     }
 
-    if (body.event.type === "charge:failed") {
+    if (body?.event?.type === "charge:failed") {
       const { paymentId } = body.event?.data?.metadata;
 
       await prisma.payment.update({
@@ -172,7 +173,7 @@ app.post("/webhook", async (c) => {
       });
     }
 
-    if (body.event.type === "charge:pending") {
+    if (body?.event?.type === "charge:pending") {
       const { paymentId } = body.event?.data?.metadata;
 
       await prisma.payment.update({
@@ -187,7 +188,7 @@ app.post("/webhook", async (c) => {
       });
     }
 
-    if (body.event.type === "charge:resolved") {
+    if (body?.event?.type === "charge:resolved") {
       const { paymentId } = body.event?.data?.metadata;
 
       await prisma.payment.update({
@@ -205,7 +206,6 @@ app.post("/webhook", async (c) => {
     return c.json({
       success: true,
     });
-    
   } catch (error) {
     c.json({
       success: false,
