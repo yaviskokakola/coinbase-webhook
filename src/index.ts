@@ -1,6 +1,4 @@
-import { Hono } from "hono";
-
-const app = new Hono();
+import express from "express";
 import { PrismaClient, SubscriptionType } from "@prisma/client";
 import subscriptionPrices from "./config/subscription-prices";
 import { env } from "./env";
@@ -9,6 +7,7 @@ import { coinbaseAPI } from "./config/coinbase";
 import { Root } from "./types";
 
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
+const app = express();
 
 export const prisma =
   globalForPrisma.prisma ||
@@ -18,57 +17,44 @@ export const prisma =
 
 if (process.env.NODE_ENV != "production") globalForPrisma.prisma;
 
-app.post("/purchase", async (c) => {
-  const { userId } = c.req.query();
-  const { type } = await c.req.parseBody();
-  const { username } = await c.req.parseBody();
+app.post("/purchase", async (req, res) => {
+  const { userId } = req.query;
+  const { type, username } = req.body;
 
   if (
     type !== SubscriptionType.PROFESSIONAL &&
     type !== SubscriptionType.ADVENCED
   ) {
-    return c.json(
-      {
-        error: "type is required",
-      },
-      403
-    );
+    return res.status(403).send({
+      error: "type is required",
+    });
   }
 
   if (!username) {
-    return c.json(
-      {
-        error: "username is required",
-      },
-      403
-    );
+    return res.status(403).send({
+      error: "username is required",
+    });
   }
 
   if (!userId) {
-    return c.json(
-      {
-        error: "userId is required",
-      },
-      403
-    );
+    return res.status(403).send({
+      error: "userId is required",
+    });
   }
 
   if (!userId) {
-    return c.json(
-      {
-        error: "userId is required",
-      },
-      403
-    );
+    return res.send({
+      error: "userId is required",
+    });
   }
 
   const payment = await prisma.payment.create({
     data: {
-      userId,
+      userId: userId as string,
       username: username as string,
       status: "CREATED",
       type: "ADVENCED",
-      amount: `${subscriptionPrices[type]}`,
+      amount: `${subscriptionPrices[type as SubscriptionType]}`,
       code: "",
     },
   });
@@ -83,8 +69,8 @@ app.post("/purchase", async (c) => {
     },
     body: JSON.stringify(
       coinbase_model({
-        userId: userId,
-        amount: subscriptionPrices[type],
+        userId: userId as string,
+        amount: subscriptionPrices[type as SubscriptionType],
         paymentId: payment.id,
         type,
         username: payment.username,
@@ -92,21 +78,21 @@ app.post("/purchase", async (c) => {
     ),
   });
 
-  const checkout = await createCheckoutResponse.json();
+  const checkout = (await createCheckoutResponse.json()) as any;
 
-  return c.json({
+  return res.send({
     paymentUrl: checkout.data.hosted_url,
   });
 });
 
-app.post("/webhook", async (c) => {
+app.post("/webhook", async (req, res) => {
   try {
-    const body = (await c.req.parseBody()) as unknown as Root;
+    const body = req.body as Root;
     let date = new Date();
     let expiresAt = new Date(date);
     expiresAt.setMonth(expiresAt.getMonth() + 1);
 
-    console.log(body)
+    console.log(body);
 
     if (body?.event?.type === "charge:confirmed") {
       const { paymentId } = body.event?.data?.metadata;
@@ -119,7 +105,7 @@ app.post("/webhook", async (c) => {
         },
       });
 
-      return c.json({
+      return res.send({
         success: true,
       });
     }
@@ -135,7 +121,7 @@ app.post("/webhook", async (c) => {
         },
       });
 
-      return c.json({
+      return res.send({
         success: true,
       });
     }
@@ -153,7 +139,7 @@ app.post("/webhook", async (c) => {
         },
       });
 
-      return c.json({
+      return res.send({
         success: true,
       });
     }
@@ -168,7 +154,7 @@ app.post("/webhook", async (c) => {
         },
       });
 
-      return c.json({
+      return res.send({
         success: true,
       });
     }
@@ -183,7 +169,7 @@ app.post("/webhook", async (c) => {
         },
       });
 
-      return c.json({
+      return res.send({
         success: true,
       });
     }
@@ -198,16 +184,16 @@ app.post("/webhook", async (c) => {
         },
       });
 
-      return c.json({
+      return res.send({
         success: true,
       });
     }
 
-    return c.json({
+    return res.send({
       success: true,
     });
   } catch (error) {
-    c.json({
+    res.send({
       success: false,
     });
   }
