@@ -1,0 +1,16 @@
+{
+  "scripts": {
+    "build": "prisma migrate deploy && prisma generate",
+    "dev": "bun run --hot src/index.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "5.5.2",
+    "@t3-oss/env-nextjs": "^0.7.1",
+    "hono": "^3.9.2",
+    "prisma": "^5.5.2",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "bun-types": "^1.0.7"
+  }
+}
