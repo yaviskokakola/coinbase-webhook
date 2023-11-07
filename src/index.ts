@@ -27,8 +27,6 @@ app.post("/purchase", async (req, res) => {
   const { userId } = req.query;
   const { type, username } = req.body;
 
-  console.log(req.body);
-
   if (
     type !== SubscriptionType.PROFESSIONAL &&
     type !== SubscriptionType.ADVENCED
@@ -100,16 +98,16 @@ app.post("/webhook", async (req, res) => {
     let expiresAt = new Date(date);
     expiresAt.setMonth(expiresAt.getMonth() + 1);
 
-    console.log(body);
-
     if (body?.event?.type === "charge:confirmed") {
       const { paymentId } = body.event?.data?.metadata;
-      console.log("here?");
+      const paymentTransactionId = body.event.data.payments[0]?.transaction_id;
 
       await prisma.payment.update({
         where: { id: paymentId },
         data: {
           status: "CONFIRMED",
+          txid: paymentTransactionId,
+          expiresAt,
         },
       });
 
