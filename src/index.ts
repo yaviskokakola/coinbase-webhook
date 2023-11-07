@@ -106,6 +106,8 @@ app.post("/webhook", async (c) => {
     let expiresAt = new Date(date);
     expiresAt.setMonth(expiresAt.getMonth() + 1);
 
+    console.log(body)
+
     if (body.event.type === "charge:confirmed") {
       const { paymentId } = body.event?.data?.metadata;
 
