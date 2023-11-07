@@ -106,7 +106,7 @@ app.post("/webhook", async (c) => {
     let expiresAt = new Date(date);
     expiresAt.setMonth(expiresAt.getMonth() + 1);
 
-    console.log(body)
+    console.log(body);
 
     if (body.event.type === "charge:confirmed") {
       const { paymentId } = body.event?.data?.metadata;
@@ -118,24 +118,7 @@ app.post("/webhook", async (c) => {
         },
       });
 
-      c.json({
-        success: true,
-      });
-    }
-    if (body.event.type === "charge:confirmed") {
-      const { paymentId } = body.event?.data?.metadata;
-      const paymentTransactionId = body.event.data.payments[0]?.transaction_id;
-
-      await prisma.payment.update({
-        where: { id: paymentId },
-        data: {
-          status: "CONFIRMED",
-          txid: paymentTransactionId,
-          expiresAt
-        },
-      });
-
-      c.json({
+      return c.json({
         success: true,
       });
     }
@@ -151,7 +134,7 @@ app.post("/webhook", async (c) => {
         },
       });
 
-      c.json({
+      return c.json({
         success: true,
       });
     }
@@ -165,11 +148,11 @@ app.post("/webhook", async (c) => {
         data: {
           status: "DELAYED",
           txid: paymentTransactionId,
-          expiresAt
+          expiresAt,
         },
       });
 
-      c.json({
+      return c.json({
         success: true,
       });
     }
@@ -184,7 +167,7 @@ app.post("/webhook", async (c) => {
         },
       });
 
-      c.json({
+      return c.json({
         success: true,
       });
     }
@@ -199,7 +182,7 @@ app.post("/webhook", async (c) => {
         },
       });
 
-      c.json({
+      return c.json({
         success: true,
       });
     }
@@ -214,10 +197,15 @@ app.post("/webhook", async (c) => {
         },
       });
 
-      c.json({
+      return c.json({
         success: true,
       });
     }
+
+    return c.json({
+      success: true,
+    });
+    
   } catch (error) {
     c.json({
       success: false,
