@@ -1,17 +1,19 @@
 import express from "express";
+
 import { PrismaClient, SubscriptionType } from "@prisma/client";
 import subscriptionPrices from "./config/subscription-prices";
 import { env } from "./env";
-import cors from 'cors'
+import cors from "cors";
 import { coinbase_model } from "./utils/coinbase-model";
 import { coinbaseAPI } from "./config/coinbase";
 import { Root } from "./types";
 
-const globalForPrisma = global as unknown as { prisma: PrismaClient };
 const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+const globalForPrisma = global as unknown as { prisma: PrismaClient };
 
 export const prisma =
   globalForPrisma.prisma ||
@@ -24,6 +26,8 @@ if (process.env.NODE_ENV != "production") globalForPrisma.prisma;
 app.post("/purchase", async (req, res) => {
   const { userId } = req.query;
   const { type, username } = req.body;
+
+  console.log(req.body);
 
   if (
     type !== SubscriptionType.PROFESSIONAL &&
@@ -204,5 +208,5 @@ app.post("/webhook", async (req, res) => {
 });
 
 app.listen(process.env.PORT, () => {
-  console.log('Server is runnning')
-})
+  console.log("Server is runnning", process.env.PORT);
+});
